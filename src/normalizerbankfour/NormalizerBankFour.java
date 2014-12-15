@@ -61,7 +61,7 @@ public class NormalizerBankFour {
                 String message = normalizeMessage(new String(delivery.getBody()));
                 BasicProperties probs = new BasicProperties().builder().correlationId(delivery.getProperties().getCorrelationId()).build();
                 channelOut.basicPublish(OUT_EXCHANGE, OUT_QUEUE, probs, message.getBytes());
-               // channelIn.basicAck(l, false); fix parameter
+ //              channelIn.basicAck(delivery.getEnvelope().getDeliveryTag(), true);
             } catch (InterruptedException ex) {
                 Logger.getLogger(NormalizerBankFour.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ShutdownSignalException ex) {
