@@ -28,7 +28,7 @@ import utilities.xml.xmlMapper;
 public class NormalizerBankFour {
 
     private static final String IN_QUEUE = "bank_four_normalizer_gr1";
-    private static final String OUT_QUEUE = "agregattor_gr1";
+    private static final String OUT_QUEUE = "aggregator_gr1";
     private static Channel channelIn;
     private static Channel channelOut;
     private static QueueingConsumer consumer;
@@ -59,7 +59,6 @@ public class NormalizerBankFour {
                 String message = normalizeMessage(new String(delivery.getBody()));
                 BasicProperties probs = new BasicProperties().builder().correlationId(delivery.getProperties().getCorrelationId()).build();
                 channelOut.basicPublish("", OUT_QUEUE, probs, message.getBytes());
-                //              channelIn.basicAck(delivery.getEnvelope().getDeliveryTag(), true);
             } catch (InterruptedException ex) {
                 Logger.getLogger(NormalizerBankFour.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ShutdownSignalException ex) {
@@ -77,12 +76,14 @@ public class NormalizerBankFour {
         XPath xPath = XPathFactory.newInstance().newXPath();
         Document doc = xmlMapper.getXMLDocument(message);
         try {
-            String ssn = xPath.compile("/LoanRequest/ssn").evaluate(doc);
-            ssn = ssn.substring(0,6) + "-" + ssn.substring(6, ssn.length());
+            String ssn = xPath.compile("/LoanResponse/ssn").evaluate(doc);
+            ssn = ssn.substring(0,6) + "-" + ssn.substring(6);
             doc.getElementsByTagName("ssn").item(0).getFirstChild().setNodeValue(ssn);
         } catch (XPathExpressionException ex) {
             Logger.getLogger(NormalizerBankFour.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return xmlMapper.getStringFromDoc(doc);
+        String result = xmlMapper.getStringFromDoc(doc);
+        System.out.println("reply: " + result);
+        return result;
     }
 }
